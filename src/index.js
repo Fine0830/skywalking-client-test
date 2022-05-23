@@ -14,17 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import ClientMonitor from '../node_modules/skywalking-client-js/src/index';
-import ClientMonitor from 'skywalking-client-js';
+import ClientMonitor from '../node_modules/skywalking-client-js/src/index';
+// import ClientMonitor from 'skywalking-client-js';
 import Vue from 'vue';
-
 ClientMonitor.register({
     service: 'test-ui',
     pagePath: 'index.html',
     serviceVersion: 'v1.0.0',
     vue: Vue,
     useFmp: true,
+    traceSDKInternal: true,
 });
+
+
+var url = 'https://api.test.com/test';
+var xhr = new XMLHttpRequest();
+xhr.open('post', url, true);
+xhr.setRequestHeader('X-Custom-Header', 'value');
+xhr.send();
 // // promise error
 function foo() {
   Promise.reject({
@@ -34,13 +41,13 @@ function foo() {
 }
 foo();
 
-fetch('http://example.com/movies')
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(myJson) {
-    console.log(myJson);
-  });
+// fetch('http://example.com/movies')
+//   .then(function(response) {
+//     return response.json();
+//   })
+//   .then(function(myJson) {
+//     console.log(myJson);
+//   });
 
 // // ajax error
 // function loadXMLDoc() {
@@ -114,29 +121,87 @@ timeout();
 //   console.log(reader);
 // });
 
-const xhr = new XMLHttpRequest();
-xhr.open('post', '/test', true);
-xhr.setRequestHeader('Content-Type', 'application/json');
-xhr.onreadystatechange = function () {
-  if (xhr.readyState === 4 && xhr.status < 400) {
-    console.log('Report Successfully');
-  }
-};
-xhr.send();
+// const xhr = new XMLHttpRequest();
+// xhr.open('post', '/graphql', true);
+// xhr.setRequestHeader('Content-Type', 'application/json');
+// xhr.onreadystatechange = function () {
+//   if (xhr.readyState === 4 && xhr.status < 400) {
+//     console.log('Report Successfully');
+//   }
+// };
+// xhr.send(JSON.stringify({
+//   query: "query queryServices($duration: Duration!,$keyword: String!) {\n    services: getAllServices(duration: $duration, group: $keyword) {\n      key: id\n      label: name\n      group\n    }\n  }",
+//   variables: {"duration":{"start":"2020-12-23 1503","end":"2020-12-23 1603","step":"MINUTE"},"keyword":""},
+// }));
 
-fetch('/graphql', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    query: "query queryServices($duration: Duration!,$keyword: String!) {\n    services: getAllServices(duration: $duration, group: $keyword) {\n      key: id\n      label: name\n      group\n    }\n  }",
-    variables: {"duration":{"start":"2020-12-23 1503","end":"2020-12-23 1603","step":"MINUTE"},"keyword":""},
-  })
-}).then((data) => {
-  console.log(data);
-})
+// fetch('/graphql', {
+//   method: 'POST',
+//   headers: {
+//     'Content-Type': 'application/json'
+//   },
+//   body: JSON.stringify({
+//     query: "query queryServices($duration: Duration!,$keyword: String!) {\n    services: getAllServices(duration: $duration, group: $keyword) {\n      key: id\n      label: name\n      group\n    }\n  }",
+//     variables: {"duration":{"start":"2020-12-23 1503","end":"2020-12-23 1603","step":"MINUTE"},"keyword":""},
+//   })
+// }).then((data) => {
+//   console.log(data);
+// })
 
 // js error
 const ss = null;
 ss.v;
+
+
+function foreachTree1(tree, func) {
+  tree.forEach(element => {
+    func(element);
+    element.children && mapTree1(element.children);
+  });
+}
+function foreachTree2(tree, func) {
+  tree.forEach(element => {
+    element.children && mapTree1(element.children);
+    func(element);
+  });
+}
+function foreachTree3(tree, func) {
+  const list = [...tree];
+  let node;
+
+  while (node = list.shift()) {
+    func(node);
+    node.children && list.push(node.children);
+  }
+}
+
+function foreachTree4(tree, func) {
+  const list = [...tree];
+  let node;
+  while (node = list.shift()) {
+    func(node);
+    node.children && list.unshift(node.children);
+  }
+}
+
+function foreachTree5(tree, func) {
+  const list = [...tree];
+  let node, i = 0;
+  while(list[i]) {
+    const len = node.children ? node.children.length : 0;
+    if (!node.children || node.children[len - 1] === list[i - 1]) {
+      func(node);
+      i++
+    } else {
+      list.splice(i, 0, ...node.children);
+    }
+  }
+}
+
+function listToTree6(list) {
+  const info = list.reduce((map, node) => {map[node.id] = node; node.children = [];});
+
+  const tree = list.fliter((node) => {
+    info[node.pId] && info[node.pId].children.push(node);
+    return !node.pId;
+  })
+}

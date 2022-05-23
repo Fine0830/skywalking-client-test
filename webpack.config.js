@@ -33,10 +33,6 @@ module.exports = {
   ],
   devServer: {
     proxy: {
-      '/browser/*': {
-        target: 'http://123333',
-        changeOrigin: true,
-      },
       '/graphql': {
         target: 'http://demo.skywalking.apache.org',
         changeOrigin: true,
